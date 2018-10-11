@@ -118,4 +118,16 @@ class Helpers
 
         return $data;
     }
+
+    public static function mapObjectIDs($objectIDKey, $objects)
+    {
+        return array_map(function ($object) use ($objectIDKey) {
+            if (!isset($object[$objectIDKey])) {
+                throw new MissingObjectId("One object didn't have any $objectIDKey key: ".json_encode($object));
+            }
+            $object['objectID'] = $object[$objectIDKey];
+
+            return $object;
+        }, $objects);
+    }
 }

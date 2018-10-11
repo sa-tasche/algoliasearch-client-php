@@ -148,8 +148,32 @@ class Index implements IndexInterface
 
     public function saveObjects($objects, $requestOptions = array())
     {
-        Helpers::ensureObjectID($objects, 'All objects must have an unique objectID (like a primary key) to be valid.');
+        if (isset($requestOptions['autoGenerateObjectIDIfNotExist']) && $requestOptions['autoGenerateObjectIDIfNotExist']) {
+            unset($requestOptions['autoGenerateObjectIDIfNotExist']);
 
+            return $this->addObjects($objects, $requestOptions);
+        }
+
+        if (isset($requestOptions['objectIDKey']) && $requestOptions['objectIDKey']) {
+            $objects = Helpers::mapObjectIDs($requestOptions['objectIDKey'], $objects);
+            unset($requestOptions['objectIDKey']);
+        }
+
+        Helpers::ensureObjectID($objects, '
+All objects must have an unique objectID (like a primary key) to be valid.
+
+If your batch as a unique identifier but is not called objectID,
+you can map it automatically by using `saveObjects($objects, [\'objectIDKey\' => \'primary\'])`
+
+Algolia is also able to generate objectIDs automatically but bare in mind that *it\'s not recommended*.
+If you want to do it anyway, use `saveObjects($objects, [\'autoGenerateObjectIDIfNotExist\' => true])`
+        ');
+
+        return $this->batch(Helpers::buildBatch($objects, 'updateObject'), $requestOptions);
+    }
+
+    protected function addObjects($objects, $requestOptions = array())
+    {
         return $this->batch(Helpers::buildBatch($objects, 'addObject'), $requestOptions);
     }
 
