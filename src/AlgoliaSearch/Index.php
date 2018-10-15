@@ -965,6 +965,39 @@ class Index
     }
 
     /**
+     * Rename the index.
+     *
+     * @param  string $newIndexName
+     * @param  array $requestHeaders
+     *
+     * @return mixed
+     *
+     * @throws \AlgoliaSearch\AlgoliaException
+     */
+    public function rename($newIndexName, $requestHeaders = array())
+    {
+        $response =  $this->client->request(
+            $this->context,
+            'POST',
+            '/1/indexes/'.$this->urlIndexName.'/operation',
+            null,
+            array(
+                'operation' => 'move',
+                'destination' => $newIndexName,
+            ),
+            $this->context->writeHostsArray,
+            $this->context->connectTimeout,
+            $this->context->readTimeout,
+            $requestHeaders
+        );
+
+        $this->indexName = $newIndexName;
+        $this->urlIndexName = urlencode($newIndexName);
+
+        return $response;
+    }
+
+    /**
      * Get settings of this index.
      *
      * @return mixed

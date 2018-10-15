@@ -73,6 +73,20 @@ class MoveIndexTest extends AlgoliaSearchTestCase
         $this->assertEquals('Robin', $res['hits'][0]['firstname']);
     }
 
+    public function testRenameIndex()
+    {
+        $task = $this->index->addObject(array('firstname' => 'Robin'));
+        $this->index->waitTask($task['taskID']);
+        $res = $this->index->rename($this->safe_name('àlgol?à2-php'));
+        $this->index->waitTask($res['taskID']);
+        $res = $this->index->search('');
+        $list = $this->client->listIndexes();
+        $this->assertTrue($this->includeValue($list['items'], 'name', $this->safe_name('àlgol?à2-php')));
+        $this->assertFalse($this->includeValue($list['items'], 'name', $this->safe_name('àlgol?à-php')));
+        $this->assertEquals(1, $res['nbHits']);
+        $this->assertEquals('Robin', $res['hits'][0]['firstname']);
+    }
+
     public function testCopyIndex()
     {
         $this->index2 = $this->client->initIndex($this->safe_name('àlgol?à2-php'));
