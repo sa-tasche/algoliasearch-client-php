@@ -442,9 +442,13 @@ class Client
      * @param array $scope Resource to copy instead of records: 'settings', 'rules', 'synonyms'
      * @param array $requestHeaders
      * @return mixed
+     *
+     * @deprecated
      */
     public function scopedCopyIndex($srcIndexName, $dstIndexName, array $scope = array(), array $requestHeaders = array())
     {
+        @trigger_error('The function '.__FUNCTION__.' is deprecated and will be removed in 2.0. Call `copyIndex($src, $dest, ["scope" => $scope])` instead.', E_USER_DEPRECATED);
+
         $request = array(
             'operation' => 'copy',
             'destination' => $dstIndexName,
@@ -453,6 +457,8 @@ class Client
         if (! empty($scope)) {
             $request['scope'] = $scope;
         }
+
+        $requestHeaders['X-Algolia-Deprecated'] = 'PHP___'.__CLASS__.'::'.__FUNCTION__.'___'.Version::VALUE;
 
         return $this->request(
             $this->context,
